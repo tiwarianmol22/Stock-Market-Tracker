@@ -1,5 +1,5 @@
 # APT — Real-Time Order Monitor
-Atypical Technologies Pvt Ltd | Interview Assignment
+Atypical Technologies Pvt Ltd | Stock Market Tracker
 
 A production-style real-time order tracking system where clients receive instant updates whenever data in the MySQL database changes — with zero polling.
 
