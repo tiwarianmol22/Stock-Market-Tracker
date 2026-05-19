@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APT — Live Order Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="bg-plate"></div>
+<canvas id="bg-canvas"></canvas>
+<header>
+  <div class="logo">⬡ APT</div>
+  <div class="header-title">Atypical Technologies — Live Order Monitor</div>
+  <div class="header-right">
+    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+    <div class="clock" id="clock">--:--:-- IST</div>
+    <div class="status-badge">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">OFFLINE</span>
+    </div>
+  </div>
+</header>
+
+<div class="indices-bar" id="indicesBar">
+  <div class="index-item" id="idx-nifty">
+    <span class="index-name">NIFTY 50</span>
+    <span class="index-value">22,456.20</span>
+    <span class="index-change">+124.50 (+0.56%)</span>
+  </div>
+  <div class="index-item" id="idx-sensex">
+    <span class="index-name">SENSEX</span>
+    <span class="index-value">73,895.50</span>
+    <span class="index-change">+412.30 (+0.56%)</span>
+  </div>
+  <div class="index-item" id="idx-banknifty">
+    <span class="index-name">NIFTY BANK</span>
+    <span class="index-value">48,230.15</span>
+    <span class="index-change">-89.40 (-0.19%)</span>
+  </div>
+  <div class="index-item" id="idx-niftyit">
+    <span class="index-name">NIFTY IT</span>
+    <span class="index-value">34,120.40</span>
+    <span class="index-change">+195.80 (+0.58%)</span>
+  </div>
+</div>
+
+<main>
+  <!-- Market Status Banner -->
+  <div class="market-status-banner" id="marketBanner">
+    <div class="market-status-glow"></div>
+    <div class="market-status-content">
+      <div class="market-badge" id="marketBadge">CHECKING</div>
+      <div class="market-desc" id="marketBannerText">Verifying Indian stock market session...</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card total">
+      <div class="stat-content">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <svg class="stat-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+    </div>
+    <div class="stat-card buy">
+      <div class="stat-content">
+        <div class="stat-label">BUY Orders</div>
+        <div class="stat-value" id="statBuy">0</div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <svg class="stat-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+      </div>
+    </div>
+    <div class="stat-card sell">
+      <div class="stat-content">
+        <div class="stat-label">SELL Orders</div>
+        <div class="stat-value" id="statSell">0</div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <svg class="stat-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+      </div>
+    </div>
+    <div class="stat-card updates">
+      <div class="stat-content">
+        <div class="stat-label">Live Updates</div>
+        <div class="stat-value" id="statUpdates">0</div>
+      </div>
+      <div class="stat-icon-wrapper">
+        <svg class="stat-svg pulsing" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="section-header"><div class="section-title">📊 Order Book</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Symbol</th><th>Exchange</th><th>Type</th><th>Qty</th><th>Price (₹)</th><th>Status</th><th>Customer</th><th>Updated</th></tr></thead>
+          <tbody id="ordersTableBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-dim);">Loading orders...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Gainers and Losers Widget -->
+      <div class="gainers-losers-container">
+        <div class="g-l-card gainer-card">
+          <div class="g-l-header">📈 TOP GAINERS</div>
+          <div class="g-l-table-wrap">
+            <table class="g-l-table">
+              <thead>
+                <tr><th>Symbol</th><th>Price (₹)</th><th>Change</th></tr>
+              </thead>
+              <tbody id="gainersList">
+                <tr><td colspan="3" style="text-align:center;color:var(--text-dim);">Calculating data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="g-l-card loser-card">
+          <div class="g-l-header">📉 TOP LOSERS</div>
+          <div class="g-l-table-wrap">
+            <table class="g-l-table">
+              <thead>
+                <tr><th>Symbol</th><th>Price (₹)</th><th>Change</th></tr>
+              </thead>
+              <tbody id="losersList">
+                <tr><td colspan="3" style="text-align:center;color:var(--text-dim);">Calculating data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <!-- Controls box moved to the top of right panel -->
+      <div class="control-panel">
+        <div class="control-title">🎛 Controls</div>
+        <div class="btn-group">
+          <button class="btn btn-green" onclick="addRandomOrder()">+ Random Order</button>
+          <button class="btn btn-amber" onclick="simulateUpdate()">↻ Update Status</button>
+        </div>
+        <div style="font-size:0.62rem;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;">Manual Insert</div>
+        <div class="form-row">
+          <select class="form-select" id="fSymbol">
+            <option value="" disabled selected>Select Symbol</option>
+            <option value="RELIANCE">RELIANCE</option>
+            <option value="INFY">INFY</option>
+            <option value="TCS">TCS</option>
+            <option value="HDFCBANK">HDFCBANK</option>
+            <option value="WIPRO">WIPRO</option>
+            <option value="SBIN">SBIN</option>
+            <option value="ICICIBANK">ICICIBANK</option>
+            <option value="TATASTEEL">TATASTEEL</option>
+          </select>
+          <input class="form-input" id="fCustomer" placeholder="Customer Name" />
+        </div>
+        <div class="form-row"><input class="form-input" id="fQty" type="number" placeholder="Qty" value="10" /><input class="form-input" id="fPrice" type="number" placeholder="Price ₹" value="1000" /></div>
+        <div class="form-row"><select class="form-select" id="fType"><option value="BUY">BUY</option><option value="SELL">SELL</option></select><select class="form-select" id="fExchange"><option value="NSE">NSE</option><option value="BSE">BSE</option></select></div>
+        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="submitManualOrder()">Place Order</button>
+      </div>
+
+      <div class="chart-box"><div class="section-title" style="margin-bottom:10px;">📈 Update Activity</div><canvas id="activityChart"></canvas></div>
+      <div class="event-feed"><div class="event-feed-header">⚡ Live Event Stream</div><div id="eventLog"></div></div>
+    </div>
+  </div>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
